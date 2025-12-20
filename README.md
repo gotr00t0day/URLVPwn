@@ -69,7 +69,7 @@ sudo apt-get install build-essential libssl-dev
 
 1. **Clone the repository:**
 ```bash
-git clone <repository-url>
+git clone [repository url](https://github.com/gotr00t0day/URLVPwn.git)
 cd URLVPwn
 ```
 
