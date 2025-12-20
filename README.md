@@ -2,11 +2,6 @@
 
 **URLVPwn** is a powerful URL validation bypass testing tool designed to evaluate Web Application Firewall (WAF) defenses on protected endpoints. It supports multiple attack classes including SSRF, open redirects, and path traversal, with advanced WAF bypass techniques and custom HTTP header injection capabilities.
 
-**Version:** 1.0  
-**Author:** c0d3Ninja  
-**Website:** https://gotr00t0day.github.io  
-**Instagram:** @gotr00t0day
-
 ---
 
 ## 🎯 Features
